@@ -1,0 +1,213 @@
+package project5;
+
+
+import java.util.Random;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+public class project5 extends Application{
+	public static void main(String args[]) {
+		launch(args);
+	}
+	static String str;
+	class All extends Pane{
+		int [] random=new int[4];//用来存放四个图片的代号
+		int [] oprend = new int[4];//用来存放四个要计算的数字
+		//顶部窗口
+		HBox b1 = new HBox();
+		Button button1=new Button("Find a Solution");
+		TextField text = new TextField();
+		Button button2 =new Button("refresh");
+		//中部图片区域
+		Image []image= new Image[52];
+		ImageView imgview_1 =new ImageView();
+		ImageView imgview_2 =new ImageView();
+		ImageView imgview_3 =new ImageView();
+		ImageView imgview_4 =new ImageView();
+		HBox b2 = new HBox();
+		//底部窗口
+		Text text1 = new Text("Enter an experssion");
+		TextField text2 = new TextField("");
+		Button button3 = new Button("Verify");
+		HBox b3 = new HBox();
+		//构造函数
+		All(){
+			b1.getChildren().addAll(button1,text,button2);
+			for(int i=0;i<52;i++) {
+				String str="file:image/card/"+String.valueOf(i+1)+".png";
+				image[i]=new Image(str);
+				}
+			b2.getChildren().addAll(imgview_1,imgview_2,imgview_3,imgview_4);
+			b2.setLayoutY(50);
+			b3.getChildren().addAll(text1,text2,button3);
+			b3.setLayoutY(180);
+			this.getChildren().addAll(b1,b2,b3);
+			button2.setOnAction(e1->{            //刷新功能
+				for(int i=0;i<=3;i++) {
+					Random r =new Random();
+					random[i]= r.nextInt()%51;
+					if(random[i]<0)random[i]=0-random[i];
+					for(int j=0;j<i;j++) {
+						if(random[j]==random[i]) {
+							j=-1;
+							random[i]= r.nextInt()%52;
+							if(random[i]<0)random[i]=0-random[i];
+						}
+					}
+				}
+				imgview_1.setImage(image[random[0]+1]);
+				imgview_2.setImage(image[random[1]+1]);
+				imgview_3.setImage(image[random[2]+1]);
+				imgview_4.setImage(image[random[3]+1]);
+				for(int i=0;i<4;i++) {
+					oprend[i]=(random[i]+2)%13; //对四个操作数赋值
+					if(oprend[i]==0)oprend[i]=13;
+				}
+				
+				
+			});
+			button1.setOnAction(e2->{          //计算24点
+				int []o=new int[4];          //存放四个数的运算顺序
+				String []st =new String[4];
+				for(int i=0;i<4;i++) {
+					st[i]=String.valueOf(oprend[i])+",";
+				}
+				int []is_true=random_num(oprend,st);
+				if(is_true[0]==0) {
+					text.setText("erro");
+				}
+				if(is_true[0]==24) {
+					text.setText(str);
+				}
+				
+			});
+		}
+	}
+	//对四个数的运算顺序进行遍历，第一次运算后变为3个数的运算遍历
+	static int[] random_num(int[] num,String[] st) {
+		if(num.length==1) {
+			return num;
+		}
+		int[] newnum=new int[num.length-1];
+		String[] newst= new String[num.length-1];
+		for(int i=0;i<num.length;i++) {
+			for(int j=i+1;j<num.length;j++) {
+				for(int k=0;k<5;k++) {              //遍历6种运算，除与被除,减与被减
+					if(k==0) {                    //+法 
+						newnum[0]=num[i]+num[j];
+						newst[0]=st[i]+st[j]+"+";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m])+",";m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 ) return It_is_just_a_name;
+					}
+					if(k==1) {                    //-法 }
+						newnum[0]=num[i]-num[j];
+						newst[0]=st[i]+st[j]+"-";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m]+",");m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 )return It_is_just_a_name;
+					}
+					if(k==2) {                    //被减
+						newnum[0]=num[j]-num[i];
+						newst[0]=st[j]+st[i]+"-";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m])+",";m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 )return It_is_just_a_name;
+					}
+					if(k==3) {                    //*
+						newnum[0]=num[i]*num[j];
+						newst[0]=st[i]+st[j]+"*";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m])+",";m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 )return It_is_just_a_name;
+					}
+					if(k==4) {                    //除法
+						if(num[j]!=0) {
+						newnum[0]=num[i]/num[j];
+						newst[0]=st[i]+st[j]+"/";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m])+",";m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 )return It_is_just_a_name;
+						}
+					}
+					if(k==5) {                    //被除 
+						if(num[i]!=0) {
+						newnum[0]=num[j]/num[i];
+						newst[0]=st[j]+st[i]+"/";
+						if(newnum.length==1) {             //递归终点
+							if(newnum[0]==24) {
+								str=newst[0];
+								return newnum;}
+							}
+						for(int l=0,m=1;l<num.length;l++) {
+							if(l!=i&&l!=j) {newnum[m]=num[l];newst[m]=String.valueOf(newnum[m])+",";m++;}
+						}
+						int[] It_is_just_a_name = random_num(newnum,newst);
+						if(It_is_just_a_name[0] ==24 )return It_is_just_a_name;
+					}
+						}
+			}
+			//建立一个新的数组，存放新的数字
+		}
+	}
+		int[]erro=new int[1];
+		return erro;
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		// TODO Auto-generated method stub
+		All all =new All();
+		Scene scene = new Scene(all);
+		primaryStage.setTitle("24point");
+		primaryStage.setWidth(350);
+		primaryStage.setHeight(250);
+		primaryStage.setScene(scene);
+		primaryStage.show();
+		
+	}
+}
